@@ -1,0 +1,64 @@
+<?php
+
+// Verifique se o parâmetro foto está presente na URL
+if (isset($_GET['foto'])) {
+    // Obtém o nome da foto requisitada
+        $nomeFoto = $_GET['foto'];
+
+            // Verifique se o arquivo de foto existe
+                $caminhoFoto = 'fotos/' . $nomeFoto . '.jpg';
+                    if (file_exists($caminhoFoto)) {
+                            // Abre o arquivo "dados.json" e lê seu conteúdo
+                                    $json = file_get_contents('dados.json');
+                                            $dados = json_decode($json, true);
+
+                                                    // Aqui, assumimos que a chave no JSON e o nome da foto são equivalentes,
+                                                            // mas você pode precisar ajustar $nomeFoto para corresponder exatamente às chaves do JSON.
+                                                                    // Isso pode incluir manipular a string para corresponder a capitalização, etc.
+                                                                            $nomeFotoFormatado = $nomeFoto; // Ajuste conforme necessário
+
+                                                                                    // Verifica se existem dados relacionados ao nome da foto
+                                                                                            if (isset($dados[$nomeFotoFormatado])) {
+                                                                                                        $cpf = $dados[$nomeFotoFormatado]['cpf'];
+                                                                                                                    $dataNascimento = $dados[$nomeFotoFormatado]['dataNascimento'];
+
+                                                                                                                                // Formatando a data de nascimento
+                                                                                                                                            $dataNascimentoFormatada = date("d/m/Y", strtotime($dataNascimento));
+
+                                                                                                                                                        // Codifica a foto em base64
+                                                                                                                                                                    $fotoBase64 = base64_encode(file_get_contents($caminhoFoto));
+
+                                                                                                                                                                                $resposta = [
+                                                                                                                                                                                                'status' => 200,
+                                                                                                                                                                                                                'cpf' => $cpf,
+                                                                                                                                                                                                                                // Aqui, o 'nome' será o valor de $nomeFotoFormatado, que deve ser a chave no JSON
+                                                                                                                                                                                                                                                'nome' => $nomeFotoFormatado,
+                                                                                                                                                                                                                                                                'nascimento' => $dataNascimentoFormatada,
+                                                                                                                                                                                                                                                                                'foto_base64' => $fotoBase64
+                                                                                                                                                                                                                                                                                            ];
+
+                                                                                                                                                                                                                                                                                                        // Define os cabeçalhos HTTP
+                                                                                                                                                                                                                                                                                                                    http_response_code(200);
+                                                                                                                                                                                                                                                                                                                                header('Content-Type: application/json');
+
+                                                                                                                                                                                                                                                                                                                                            // Retorna a resposta como JSON
+                                                                                                                                                                                                                                                                                                                                                        echo json_encode($resposta);
+                                                                                                                                                                                                                                                                                                                                                                    exit;
+                                                                                                                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                                                                                                                                }
+
+                                                                                                                                                                                                                                                                                                                                                                                // Se não houver dados para a foto ou a foto não for encontrada, retorna uma resposta de erro em JSON
+                                                                                                                                                                                                                                                                                                                                                                                $erroRetorno = [
+                                                                                                                                                                                                                                                                                                                                                                                    'status' => 404,
+                                                                                                                                                                                                                                                                                                                                                                                        'erro' => 'Foto não encontrada'
+                                                                                                                                                                                                                                                                                                                                                                                        ];
+
+                                                                                                                                                                                                                                                                                                                                                                                        // Define os cabeçalhos HTTP
+                                                                                                                                                                                                                                                                                                                                                                                        http_response_code(404);
+                                                                                                                                                                                                                                                                                                                                                                                        header('Content-Type: application/json');
+
+                                                                                                                                                                                                                                                                                                                                                                                        // Exibe o JSON de erro como resposta
+                                                                                                                                                                                                                                                                                                                                                                                        echo json_encode($erroRetorno);
+                                                                                                                                                                                                                                                                                                                                                                                        exit;
+                                                                                                                                                                                                                                                                                                                                                                                        
